@@ -12,26 +12,22 @@
 
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "cosmic-files";
-  version = "1.0.0-alpha.7";
+  version = "1.0.0-beta.1";
 
   # nixpkgs-update: no auto update
   src = fetchFromGitHub {
     owner = "pop-os";
     repo = "cosmic-files";
     tag = "epoch-${finalAttrs.version}";
-    hash = "sha256-bI5yTpqU2N6hFwI9wi4b9N5onY5iN+8YDM3bSgdYxjQ=";
+    hash = "sha256-YOvNUr63rVsTbIKENqP8/iL3ga+vh6eGMgalWS5rGVc=";
   };
 
-  cargoHash = "sha256-7AOdSk9XIXFCDyCus3XgOK3ZBVa4CvX+NFM0jHf7Wbs=";
-
-  env = {
-    VERGEN_GIT_COMMIT_DATE = "2025-04-22";
-    VERGEN_GIT_SHA = finalAttrs.src.tag;
-  };
+  cargoHash = "sha256-7RANj+aXdmBVO66QDgcNrrU4qEGK4Py4+ZctYWU1OO8=";
 
   nativeBuildInputs = [
     just
     libcosmicAppHook
+    rustPlatform.bindgenHook
   ];
 
   buildInputs = [ glib ];
