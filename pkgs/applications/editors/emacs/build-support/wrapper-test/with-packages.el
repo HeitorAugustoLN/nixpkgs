@@ -153,6 +153,9 @@ Return test result, a list of values.  Each is non-nil if the test passes."
                                       nil
                                       t)))))))
 
+(defun with-packages-fonts-of-requested-packages-are-available ()
+  (list (member "Hack" (font-family-list))))
+
 (defun with-packages-no-jit-native-comp ()
   "Test no JIT native-comp is triggered during non-batch tests.
 This is a regression test for URL `https://github.com/NixOS/nixpkgs/pull/538964'."
@@ -176,6 +179,7 @@ This is a regression test for URL `https://github.com/NixOS/nixpkgs/pull/538964'
   with-packages-default-is-loaded
   with-packages-early-default-is-loaded-before-default
   with-packages-unwrapped-site-start-is-loaded-quietly
+  with-packages-fonts-of-requested-packages-are-available
   with-packages-no-jit-native-comp)
 
 (provide 'with-packages)
