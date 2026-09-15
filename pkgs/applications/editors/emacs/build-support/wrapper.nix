@@ -42,7 +42,8 @@ let
   inherit (self) emacs;
   withNativeCompilation = emacs.withNativeCompilation or false;
   withTreeSitter = emacs.withTreeSitter or false;
-  withFontconfig = !emacs.stdenv.hostPlatform.isDarwin;
+  inherit (emacs.stdenv.hostPlatform) isDarwin;
+  withFontconfig = !isDarwin;
 in
 packagesFun: # packages explicitly requested by the user
 let
@@ -194,6 +195,35 @@ let
         ''}
       '';
 
+  registerDarwinFonts =
+    if isDarwin then
+      emacs.stdenv.mkDerivation {
+        name = "register-darwin-emacs-fonts";
+        src = ./register-emacs-darwin-fonts.c;
+
+        env.NIX_CFLAGS_COMPILE = "-Wall -Wextra";
+
+        buildPhase = ''
+          runHook preBuild
+          $CC -O2 -framework CoreText -o register-darwin-emacs-fonts "$src"
+          runHook postBuild
+        '';
+
+        installPhase = ''
+          runHook preInstall
+          install -Dm555 register-darwin-emacs-fonts "$out/bin/register-darwin-emacs-fonts"
+          runHook postInstall
+        '';
+
+        meta.mainProgram = "register-darwin-emacs-fonts";
+      }
+    else
+      null;
+
+  registerDarwinFontsBin = lib.optionalString (registerDarwinFonts != null) (
+    lib.getExe registerDarwinFonts
+  );
+
   fontconfigFile =
     if withFontconfig then
       makeFontsConf {
@@ -231,6 +261,8 @@ runCommand (lib.appendToName "with-packages" emacs).name
         --subst-var-by wrapperSiteData "$deps/share" \
         --subst-var-by withFontconfig "${lib.boolToString withFontconfig}" \
         --subst-var-by wrapperFontconfigFile "${fontconfigFile}" \
+        --subst-var-by withDarwinFonts "${lib.boolToString isDarwin}" \
+        --subst-var-by registerDarwinFontsBin "${registerDarwinFontsBin}" \
         --subst-var-by wrapperInvocationDirectory "$out/bin/" \
         --subst-var-by wrapperInvocationName "$progname" \
         --subst-var prog
@@ -260,6 +292,8 @@ runCommand (lib.appendToName "with-packages" emacs).name
         --subst-var-by wrapperSiteData "$deps/share" \
         --subst-var-by withFontconfig "${lib.boolToString withFontconfig}" \
         --subst-var-by wrapperFontconfigFile "${fontconfigFile}" \
+        --subst-var-by withDarwinFonts "${lib.boolToString isDarwin}" \
+        --subst-var-by registerDarwinFontsBin "${registerDarwinFontsBin}" \
         --subst-var-by wrapperInvocationDirectory "$out/Applications/Emacs.app/Contents/MacOS/" \
         --subst-var-by wrapperInvocationName "Emacs" \
         --subst-var-by prog "$emacs/Applications/Emacs.app/Contents/MacOS/Emacs"

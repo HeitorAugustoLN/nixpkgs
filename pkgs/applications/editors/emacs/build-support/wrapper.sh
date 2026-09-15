@@ -62,6 +62,11 @@ then
     export FONTCONFIG_FILE=@wrapperFontconfigFile@
 fi
 
+if [[ @withDarwinFonts@ == true && -d "@wrapperSiteData@/fonts" ]]
+then
+  @registerDarwinFontsBin@ "@wrapperSiteData@/fonts" -- @prog@ "$@"
+fi
+
 export emacsWithPackages_invocationDirectory=@wrapperInvocationDirectory@
 export emacsWithPackages_invocationName=@wrapperInvocationName@
 
