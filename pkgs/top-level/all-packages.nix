@@ -8127,11 +8127,27 @@ with pkgs;
       pkgs' = pkgs; # default pkgs used for bootstrapping the emacs package set
     };
 
-  # We want emacsPackages to be visible in search but not be build on hydra
-  emacsPackages = recurseIntoAttrsWith {
-    hydra = false;
-    eval = false;
-  } emacs.pkgs;
+  # Expose emacsPackages in search and build all variants on hydra
+  emacsPackages =
+    if config.recursionMode == "hydra" then
+      recurseIntoAttrsWith
+        {
+          hydra = true;
+          eval = false;
+          search = false;
+        }
+        {
+          emacs31 = emacs31.pkgs;
+          emacs31-gtk3 = emacs31-gtk3.pkgs;
+          emacs31-nox = emacs31-nox.pkgs;
+          emacs31-pgtk = emacs31-pgtk.pkgs;
+          emacs30-macport = emacs30-macport.pkgs;
+        }
+    else
+      recurseIntoAttrsWith {
+        hydra = false;
+        eval = false;
+      } emacs.pkgs;
 
   espeak = espeak-ng;
 
